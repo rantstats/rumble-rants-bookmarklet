@@ -201,11 +201,6 @@ let loadRants
             .chat-text {
                 padding: 5px;
             }
-
-
-            .chat-history--row {
-                border-bottom: 1px inset black;
-            }
         `))
         document.head.appendChild(style)
     }
