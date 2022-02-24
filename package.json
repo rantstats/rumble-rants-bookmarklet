@@ -8,7 +8,7 @@
     "build-watch": "npm run build -- --watch"
   },
   "author": "Steven Crader",
-  "license": "GPLv3",
+  "license": "MIT",
   "devDependencies": {
     "ts-node": "^10.5.0",
     "typescript": "^4.5.5"
