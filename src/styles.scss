@@ -14,15 +14,28 @@
         background-color: #ccc;
         position: absolute;
         right: 0;
+        top: 0;
         width: 4px;
         height: 100%;
         cursor: w-resize;
     }
 
-    h1 {
+    .ec-header {
         text-align: center;
-        font-weight: bold;
-        font-size: 25px;
+
+        h1 {
+            font-weight: bold;
+            font-size: 25px;
+        }
+
+        .ec-options {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+
+            font-size: 12px;
+            justify-content: space-between;
+        }
     }
 
     .external-chat-list {
@@ -40,7 +53,7 @@
             display: flex;
             flex-direction: column;
 
-            &.reviewed {
+            &.read {
                 opacity: 0.5;
             }
 
@@ -52,9 +65,10 @@
                 font-weight: bold;
                 padding: 5px;
 
-                input[type=checkbox] {
+                .ec-show-hide-checkbox {
                     margin-left: auto;
                     justify-self: flex-end;
+                    font-weight: normal;
                 }
             }
 
@@ -93,5 +107,18 @@
                 padding: 5px;
             }
         }
+    }
+
+    footer {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        justify-content: center;
+        justify-self: flex-end;
+        margin-top: auto;
+
+        font-size: 10px;
+        text-align: center;
+        padding: 5px;
     }
 }

@@ -13,13 +13,21 @@
     background-color: #ccc;
     position: absolute;
     right: 0;
+    top: 0;
     width: 4px;
     height: 100%;
     cursor: w-resize; }
-  .external-chats h1 {
-    text-align: center;
-    font-weight: bold;
-    font-size: 25px; }
+  .external-chats .ec-header {
+    text-align: center; }
+    .external-chats .ec-header h1 {
+      font-weight: bold;
+      font-size: 25px; }
+    .external-chats .ec-header .ec-options {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      font-size: 12px;
+      justify-content: space-between; }
   .external-chats .external-chat-list {
     display: flex;
     flex-direction: column;
@@ -31,7 +39,7 @@
       overflow-wrap: break-word;
       display: flex;
       flex-direction: column; }
-      .external-chats .external-chat-list .external-chat.reviewed {
+      .external-chats .external-chat-list .external-chat.read {
         opacity: 0.5; }
       .external-chats .external-chat-list .external-chat .rant-amount {
         display: flex;
@@ -39,9 +47,10 @@
         align-items: center;
         font-weight: bold;
         padding: 5px; }
-        .external-chats .external-chat-list .external-chat .rant-amount input[type=checkbox] {
+        .external-chats .external-chat-list .external-chat .rant-amount .ec-show-hide-checkbox {
           margin-left: auto;
-          justify-self: flex-end; }
+          justify-self: flex-end;
+          font-weight: normal; }
       .external-chats .external-chat-list .external-chat p {
         margin: 0; }
       .external-chats .external-chat-list .external-chat .user-info {
@@ -63,3 +72,13 @@
           margin-left: auto; }
       .external-chats .external-chat-list .external-chat .chat-text {
         padding: 5px; }
+  .external-chats footer {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    justify-content: center;
+    justify-self: flex-end;
+    margin-top: auto;
+    font-size: 10px;
+    text-align: center;
+    padding: 5px; }
