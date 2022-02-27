@@ -6,12 +6,15 @@
     "scripts": {
         "build": "tsc",
         "build-watch": "yarn run build --watch",
+        "build-sass": "node-sass src/styles.scss --output lib",
+        "build-sass-watch": "yarn run build-sass --watch",
         "serve": "http-server -p 8000 lib/"
     },
     "author": "Steven Crader",
     "license": "MIT",
     "devDependencies": {
         "http-server": "^14.1.0",
+        "node-sass": "^7.0.1",
         "ts-node": "^10.5.0",
         "typescript": "^4.5.5"
     }

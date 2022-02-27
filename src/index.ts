@@ -3,208 +3,6 @@
 let loadRants
 (loadRants = function () {
 
-    const insertStyle = () => {
-        const style = document.createElement("style") as HTMLStyleElement
-        // language=css
-        style.appendChild(document.createTextNode(`
-            .external-chats {
-                z-index: 99999;
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 100vh;
-                width: 500px;
-                background: #eee;
-                overflow: scroll;
-                padding: 10px 4px 10px 10px;
-            }
-
-            #resize {
-                background-color: #ccc;
-                position: absolute;
-                right: 0;
-                width: 4px;
-                height: 100%;
-                cursor: w-resize;
-            }
-
-            .external-chats h1 {
-                text-align: center;
-                font-weight: bold;
-                font-size: 25px;
-            }
-
-            .external-chat-list {
-                display: flex;
-                flex-direction: column;
-                gap: 2px;
-            }
-
-            .external-chat {
-                border: 1px solid black;
-                margin: 3px;
-                overflow-wrap: break-word;
-
-                display: flex;
-                flex-direction: column;
-            }
-
-            .external-chat.reviewed {
-                opacity: 0.5;
-            }
-
-            .rant-amount {
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-
-                font-weight: bold;
-                padding: 5px;
-            }
-
-            .rant-amount input[type=checkbox] {
-                margin-left: auto;
-                justify-self: flex-end;
-            }
-
-
-            .external-chat p {
-                margin: 0;
-            }
-
-            .external-chat.rant-1 {
-                color: black;
-                background: #4a90e2;
-            }
-
-            .external-chat.rant-1 .rant-amount {
-                background: #4382cb;
-            }
-
-            .external-chat.rant-2 {
-                color: black;
-                background: #b8e986;
-            }
-
-            .external-chat.rant-2 .rant-amount {
-                background: #a6d279;
-            }
-
-            .external-chat.rant-5 {
-                color: black;
-                background: #f8e71c;
-            }
-
-            .external-chat.rant-5 .rant-amount {
-                background: #dfd019;
-            }
-
-            .external-chat.rant-10 {
-                color: black;
-                background: #f5a623;
-            }
-
-            .external-chat.rant-10 .rant-amount {
-                background: #dd9520;
-            }
-
-            .external-chat.rant-20 {
-                color: white;
-                background: #bd10e0;
-            }
-
-            .external-chat.rant-20 .rant-amount {
-                background: #aa0eca;
-            }
-
-            .external-chat.rant-50 {
-                color: white;
-                background: #9013fe;
-            }
-
-            .external-chat.rant-50 .rant-amount {
-                background: #8211e5;
-            }
-
-            .external-chat.rant-100 {
-                color: white;
-                background: #d0021b;
-            }
-
-            .external-chat.rant-100 .rant-amount {
-                background: #bb0218;
-            }
-
-            .external-chat.rant-200 {
-                color: white;
-                background: #d0021b;
-            }
-
-            .external-chat.rant-200 .rant-amount {
-                background: #bb0218;
-            }
-
-            .external-chat.rant-300 {
-                color: white;
-                background: #d0021b;
-            }
-
-            .external-chat.rant-300 .rant-amount {
-                background: #bb0218;
-            }
-
-            .external-chat.rant-400 {
-                color: white;
-                background: #d0021b;
-            }
-
-            .external-chat.rant-400 .rant-amount {
-                background: #bb0218;
-            }
-
-            .external-chat.rant-500 {
-                color: white;
-                background: #d0021b;
-            }
-
-            .external-chat.rant-500 .rant-amount {
-                background: #bb0218;
-            }
-
-
-            .user-info {
-                display: flex;
-                flex-direction: row;
-                gap: 5px;
-                align-items: center;
-                padding: 5px;
-            }
-
-            .user-info p {
-                font-weight: bold;
-            }
-
-            .user-info .user-image {
-                height: 30px;
-            }
-
-            .user-image img {
-                height: 100%;
-                width: 100%;
-            }
-
-            .user-info .timestamp {
-                justify-self: flex-end;
-                margin-left: auto;
-            }
-
-            .chat-text {
-                padding: 5px;
-            }
-        `))
-        document.head.appendChild(style)
-    }
-
     const chatList = document.createElement('div') as HTMLDivElement
     chatList.classList.add('external-chat-list')
 
@@ -289,6 +87,35 @@ let loadRants
 
     let rantLevels: Array<RantLevel> = []
     const users: Map<string, User> = new Map<string, User>()
+
+    const insertStyle = () => {
+        const thisScript = document.currentScript as HTMLScriptElement
+        const src = thisScript.src
+        const href = src.substring(0, src.lastIndexOf("/"))
+        const style = document.createElement("link") as HTMLLinkElement
+        style.rel = "stylesheet"
+        style.type = "text/css"
+        style.href = `${href}/styles.css`
+        document.head.appendChild(style)
+    }
+
+    const ecGenerateRantStyles = () => {
+        let styleLines = []
+        rantLevels.forEach((rantLevel) => {
+            styleLines.push(...[
+                `.external-chat.rant-${rantLevel.price_dollars} {`,
+                `color: ${rantLevel.colors.fg};`,
+                `background: ${rantLevel.colors.main};`,
+                `}`,
+                `.external-chat.rant-${rantLevel.price_dollars} .rant-amount {`,
+                `background: ${rantLevel.colors.bg2};`,
+                `}`,
+            ])
+        })
+        const style = document.createElement("style") as HTMLStyleElement
+        style.appendChild(document.createTextNode(styleLines.join(" ")))
+        document.head.appendChild(style)
+    }
 
     const insertHtml = (): HTMLDivElement => {
         const body = document.body
@@ -405,31 +232,6 @@ let loadRants
     }
 
     const handleMessage = (message: Message) => {
-        // create fake rant
-        // const rantAmounts = [
-        //     50, 100,
-        //     150, 200,
-        //     250, 500,
-        //     700, 1000,
-        //     1300, 2000,
-        //     3000, 5000,
-        //     7656, 10000,
-        //     15600, 20000,
-        //     24696, 30000,
-        //     38754, 40000,
-        //     49856, 50000,
-        //     58945
-        // ]
-        // const min = 0
-        // const max = rantAmounts.length-1
-        // const priceCents = rantAmounts[Math.floor(Math.random() * (max - min + 1) + min)]
-        // const rant: Rant = {
-        //     price_cents: priceCents,
-        //     duration: 1,
-        //     expires_on: "2022-02-21T21:38:03+00:00",
-        // }
-        // message.rant = rant
-
         // only render rants
         if (message.rant) {
             renderMessage(message)
@@ -439,6 +241,7 @@ let loadRants
     const handleInitEvent = (eventData: EventInit) => {
         const messages = eventData.data.messages
         rantLevels = eventData.data.config.rants.levels
+        ecGenerateRantStyles()
 
         const usersList = eventData.data.users
         usersList.forEach((user) => {

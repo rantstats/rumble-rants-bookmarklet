@@ -38,6 +38,7 @@ Click the checkbox on each rant to mark them as read. They will still be shown b
 2. Install Node and Yarn
 3. Run `yarn install`
 4. Build with `yarn run build`
+5. Convert the `scsss` to `css` by running `yarn run build-sass`
 
 To use local `index.js` file, change `src` in bookmarklet to path from local server.
 Start the node http server by running `yarn run serve`. 

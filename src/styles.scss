@@ -1,0 +1,97 @@
+.external-chats {
+    z-index: 99999;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 500px;
+    background: #eee;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+
+    #resize {
+        background-color: #ccc;
+        position: absolute;
+        right: 0;
+        width: 4px;
+        height: 100%;
+        cursor: w-resize;
+    }
+
+    h1 {
+        text-align: center;
+        font-weight: bold;
+        font-size: 25px;
+    }
+
+    .external-chat-list {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        overflow: auto;
+
+        .external-chat {
+            border: 1px solid black;
+            margin: 3px;
+            overflow-wrap: break-word;
+
+            display: flex;
+            flex-direction: column;
+
+            &.reviewed {
+                opacity: 0.5;
+            }
+
+            .rant-amount {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+
+                font-weight: bold;
+                padding: 5px;
+
+                input[type=checkbox] {
+                    margin-left: auto;
+                    justify-self: flex-end;
+                }
+            }
+
+            p {
+                margin: 0;
+            }
+
+            .user-info {
+                display: flex;
+                flex-direction: row;
+                gap: 5px;
+                align-items: center;
+                padding: 5px;
+
+                .user-image {
+                    max-width: 30px;
+
+                    img {
+                        height: auto;
+                        width: 30px;
+                        max-height: 30px;
+                    }
+                }
+
+                p {
+                    font-weight: bold;
+                }
+
+                .timestamp {
+                    justify-self: flex-end;
+                    margin-left: auto;
+                }
+            }
+
+            .chat-text {
+                padding: 5px;
+            }
+        }
+    }
+}
