@@ -16,7 +16,7 @@ javascript: (function () {
         rantJS.setAttribute('id', 'rant-js-script');
         rantJS.setAttribute('type', 'text/javascript');
         rantJS.setAttribute('src', 'https://combinatronics.com/stevencrader/rumble-rants-bookmarklet/master/lib/index.js');
-        document.body.appendChild(rantJS);
+        document.head.appendChild(rantJS);
     } else {
         loadRants();
     }
@@ -37,8 +37,8 @@ Click the checkbox on each rant to mark them as read. They will still be shown b
 1. Clone repo
 2. Install Node and Yarn
 3. Run `yarn install`
-4. Build with `npm build`
+4. Build with `yarn run build`
 
 To use local `index.js` file, change `src` in bookmarklet to path from local server.
-This can be done using the Python3 simple http server. Run `python3 -m http.server` from the `dist` folder. 
+Start the node http server by running `yarn run serve`. 
 The new `src` will be something like `http://localhost:8000/index.js`. 
