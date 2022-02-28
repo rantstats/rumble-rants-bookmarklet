@@ -96,6 +96,7 @@ type ECCacheData = {
     time: string,
     user_id: string,
     text: string,
+    username?: string,
     rant?: {
         price_cents: number,
     },
@@ -294,8 +295,11 @@ const ecCacheMessage = (cacheData: ECCacheData) => {
     }
 }
 
-const ecRenderMessage = (id, time, user_id, text, rant, cached = false, read = false) => {
-    let username = user_id
+const ecRenderMessage = (id, time, user_id, text, rant, username = undefined, cached = false,
+        read = false) => {
+    if (username === undefined){
+        username = user_id
+    }
     let userImage = null
     const user = ecUsers.get(user_id)
     if (user) {
@@ -309,6 +313,7 @@ const ecRenderMessage = (id, time, user_id, text, rant, cached = false, read = f
             time: time,
             user_id: user_id,
             text: text,
+            username: username,
             rant: {
                 price_cents: rant.price_cents,
             }
@@ -396,8 +401,8 @@ const ecRenderRumbleMessage = (message: RMessage) => {
 }
 
 const ecRenderCacheMessage = (message: ECCacheData) => {
-    const {id, time, user_id, text, rant, read} = message
-    ecRenderMessage(id, time, user_id, text, rant, true, read)
+    const {id, time, user_id, text, username, rant, read} = message
+    ecRenderMessage(id, time, user_id, text, rant, username, true, read)
 }
 
 const ecHandleMessage = (message: RMessage) => {
