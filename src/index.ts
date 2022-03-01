@@ -308,6 +308,11 @@ const ecRenderMessage = (id, time, user_id, text, rant, username = undefined, ca
     }
 
     if (!cached) {
+        // don't show if already cached
+        if (ecStorage.cache.has(id)) {
+            return
+        }
+
         ecCacheMessage({
             id: id,
             time: time,
@@ -407,7 +412,7 @@ const ecRenderCacheMessage = (message: ECCacheData) => {
 
 const ecHandleMessage = (message: RMessage) => {
     // only render rants, skip messages if already shown
-    if (message.rant && !(message.id in ecStorage.cache)) {
+    if (message.rant) {
         ecRenderRumbleMessage(message)
     }
 }
