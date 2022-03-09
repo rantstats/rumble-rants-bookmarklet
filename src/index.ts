@@ -106,6 +106,7 @@ type ECCacheData = {
 type ECSettings = {
     sort: "0" | "1" | string
     cache: boolean
+    width: number
 }
 
 type ECLocalStorage = {
@@ -117,6 +118,7 @@ const ecStorage: ECLocalStorage = {
     settings: {
         sort: "0",
         cache: true,
+        width: 500,
     },
     cache: new Map<string, ECCacheData>(),
 }
@@ -214,9 +216,15 @@ const ecInsertStyle = () => {
 }
 
 const ecInsertHtml = () => {
+    let width = ecStorage.settings.width || 500
+    if (width < 100) {
+        width = 200
+        ecStorage.settings.width = width
+        ecSaveData()
+    }
     // language=html
     const html = `
-        <div class="external-chats" id="external-chats">
+        <div class="external-chats" id="external-chats" style="width: ${width}px;">
             <div class="resize" id="resize"></div>
             <header class="ec-header">
                 <h1 class="ec-header-h">Rumble Rants</h1>
@@ -297,7 +305,7 @@ const ecCacheMessage = (cacheData: ECCacheData) => {
 
 const ecRenderMessage = (id, time, user_id, text, rant, username = undefined, cached = false,
         read = false) => {
-    if (username === undefined){
+    if (username === undefined) {
         username = user_id
     }
     let userImage = null
@@ -483,14 +491,22 @@ const ecHandleReceiveMessage = (event) => {
     }
 }
 
+const setSidebarWidth = (width: number) => {
+    const resize_el = document.getElementById("resize") as HTMLDivElement
+    const parent = resize_el.parentNode as HTMLDivElement
+
+    ecStorage.settings.width = width
+    parent.style.width = (width) + "px"
+    ecSaveData()
+}
+
 const ecRegisterResize = () => {
     const resize_el = document.getElementById("resize") as HTMLDivElement
     let m_pos
 
     function resize(e) {
-        const parent = resize_el.parentNode as HTMLDivElement
         m_pos = e.x
-        parent.style.width = (parseInt(m_pos)) + "px"
+        setSidebarWidth(parseInt(m_pos))
     }
 
     resize_el.addEventListener("mousedown", function (e) {
