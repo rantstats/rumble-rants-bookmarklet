@@ -91,7 +91,7 @@ type REventMessages = REventBase & {
 
 // endregion Rumble Types
 
-type ECCacheData = {
+type ECCachedRant = {
     id: string,
     time: string,
     user_id: string,
@@ -103,6 +103,11 @@ type ECCacheData = {
     read?: boolean,
 }
 
+type ECCacheData = {
+    title: string,
+    rants: Map<string, ECCachedRant>,
+}
+
 type ECSettings = {
     sort: "0" | "1" | string
     cache: boolean
@@ -111,7 +116,7 @@ type ECSettings = {
 
 type ECLocalStorage = {
     settings?: ECSettings
-    cache: Map<string, ECCacheData>,
+    cache: ECCacheData,
 }
 
 const ecStorage: ECLocalStorage = {
@@ -120,20 +125,31 @@ const ecStorage: ECLocalStorage = {
         cache: true,
         width: 500,
     },
-    cache: new Map<string, ECCacheData>(),
+    cache: {
+        title: document.title,
+        rants: new Map<string, ECCachedRant>(),
+    },
 }
 
 const ecSaveData = () => {
     localStorage.setItem(EC_SETTINGS_KEY, JSON.stringify(ecStorage.settings))
     if (ecStorage.settings.cache) {
-        const cacheData = Array.from(ecStorage.cache.values())
-        localStorage.setItem(`${EC_CACHE_PREFIX_KEY}${ecVideoId}`, JSON.stringify(cacheData))
+        localStorage.setItem(
+                `${EC_CACHE_PREFIX_KEY}${ecVideoId}`,
+                JSON.stringify({
+                    title: ecStorage.cache.title,
+                    rants: Array.from(ecStorage.cache.rants.values()),
+                })
+        )
     }
 }
 
 const ecGetData = () => {
-    const cache = new Map<string, ECCacheData>()
-    const cutOffDays = 2
+    const cache = {
+        title: "",
+        rants: new Map<string, ECCachedRant>(),
+    }
+    const cutOffDays = 14
     const cutOffTime = new Date().getTime() - (cutOffDays * 24 * 60 * 60 * 1000) // cutOffDays days ago
     const removeKeys: Array<string> = []
     for (let key in localStorage) {
@@ -145,6 +161,8 @@ const ecGetData = () => {
         try {
             data = JSON.parse(rawData)
         } catch (e) {
+            console.log(`removing key ${key} due to invalid data, could not parse as JSON`)
+            removeKeys.push(key)
             continue
         }
         if (key === EC_SETTINGS_KEY) {
@@ -153,22 +171,38 @@ const ecGetData = () => {
             const value: string = key.substring(key.indexOf('-') + 1)
             const valueInt = parseInt(value)
             if (!isNaN(valueInt)) {
-                const cacheData = data as Array<ECCacheData>
-                if (cacheData && cacheData.length > 0) {
-                    const firstRant = cacheData[0]
+                const cacheData = data as ECCacheData
+                let rants = (cacheData.rants || []) as Array<ECCachedRant>
+
+                // for backwards compatibility
+                if (Array.isArray(cacheData)) {
+                    rants = cacheData
+                }
+
+                if (rants && rants.length > 0) {
+                    const firstRant = rants[0]
                     // check if date older than cutOffDays, if so, don't keep
                     if (new Date(firstRant.time).getTime() < cutOffTime) {
-                        console.log("removing stream", value, "from local history since it is older than", cutOffDays)
+                        const cachedTitle = cacheData.title || value.toString()
+                        // const keep = window.confirm(`Cached Stream ${JSON.stringify(
+                        //         cachedTitle)} is older than ${cutOffDays} days, keep cache?`)
+                        // if (!keep) {
+                        console.log(
+                                `removing stream ${JSON.stringify(
+                                        cachedTitle)} from local history since it is older than ${cutOffDays} days`
+                        )
                         removeKeys.push(key)
+                        // }
                     } else if (value === ecVideoId) {
                         // only load cache for this video
                         console.log("saving cached rants for", value, data)
-                        cacheData.forEach((cd) => {
-                            cache.set(cd.id, cd)
+                        cache.title = cacheData.title || document.title
+                        rants.forEach((cd) => {
+                            cache.rants.set(cd.id, cd)
                         })
                     }
                 } else {
-                    console.log("removing key", key, "due to invalid data")
+                    console.log(`removing key ${key} due to invalid data`)
                     removeKeys.push(key)
                 }
             } else {
@@ -191,7 +225,7 @@ const ecSortOrderChanged = (event: Event) => {
     const chatList = document.getElementById('external-chat-list') as HTMLDivElement
     // remove all items and re-add
     chatList.textContent = ""
-    ecStorage.cache.forEach((message) => {
+    ecStorage.cache.rants.forEach((message) => {
         ecRenderCacheMessage(message)
     })
 
@@ -202,6 +236,33 @@ const ecCacheChanged = (event: Event) => {
     const checkbox = event.target as HTMLInputElement
     ecStorage.settings.cache = checkbox.checked
     ecSaveData()
+}
+
+const downloadCSV = (event: Event) => {
+    const rows = [
+        ["stream title", JSON.stringify(ecStorage.cache.title)],
+        ["id", "time", "user", "username", "text", "rant amount", "read"],
+    ]
+    ecStorage.cache.rants.forEach((data) => {
+        let rantAmount = ""
+        if (data.rant) {
+            rantAmount = (data.rant.price_cents / 100).toString()
+        }
+        rows.push([
+            JSON.stringify(data.id),
+            JSON.stringify(data.time),
+            JSON.stringify(data.user_id),
+            JSON.stringify(data.username),
+            JSON.stringify(data.text),
+            JSON.stringify(rantAmount),
+            JSON.stringify(data.read)
+        ])
+    })
+
+    const csvData = "data:text/csv;charset=utf-8," + rows.map(row => row.join(",")).join("\n")
+    window.open(encodeURI(csvData))
+
+    event.preventDefault()
 }
 
 const ecInsertStyle = () => {
@@ -251,17 +312,21 @@ const ecInsertHtml = () => {
             <footer>
                 <p><a href="https://twitter.com/stevencrader" target="_blank">By Steven Crader</a></p>
                 <p><a href="https://github.com/stevencrader/rumble-rants-bookmarklet" target="_blank">On GitHub</a></p>
+
+                <p><a href="#" id="download-csv">Export to CSV</a></p>
             </footer>
         </div>
     `
     const body = document.body
     body.insertAdjacentHTML("beforebegin", html)
 
+    const csvDownloader = document.getElementById("download-csv")
+    csvDownloader.addEventListener("click", downloadCSV)
+
     const select = document.getElementById(`ec-sort-order`)
     select.addEventListener('change', ecSortOrderChanged)
     const checkbox = document.getElementById(`ec-cache`)
     checkbox.addEventListener('change', ecCacheChanged)
-
 }
 
 const ecGetVideoID = (): string => {
@@ -287,7 +352,7 @@ const ecShowHideRant = (event: Event): void => {
     const checkbox = event.target as HTMLInputElement
 
     const messageId = checkbox.id.substring(checkbox.id.indexOf('-') + 1)
-    const cachedMessage = ecStorage.cache.get(messageId)
+    const cachedMessage = ecStorage.cache.rants.get(messageId)
     if (cachedMessage) {
         cachedMessage.read = checkbox.checked
         ecSaveData()
@@ -296,9 +361,9 @@ const ecShowHideRant = (event: Event): void => {
     rantDiv.classList.toggle("read")
 }
 
-const ecCacheMessage = (cacheData: ECCacheData) => {
+const ecCacheMessage = (cacheData: ECCachedRant) => {
     if (ecStorage.settings.cache) {
-        ecStorage.cache.set(cacheData.id, cacheData)
+        ecStorage.cache.rants.set(cacheData.id, cacheData)
         ecSaveData()
     }
 }
@@ -317,7 +382,7 @@ const ecRenderMessage = (id, time, user_id, text, rant, username = undefined, ca
 
     if (!cached) {
         // don't show if already cached
-        if (ecStorage.cache.has(id)) {
+        if (ecStorage.cache.rants.has(id)) {
             return
         }
 
@@ -413,7 +478,7 @@ const ecRenderRumbleMessage = (message: RMessage) => {
     ecRenderMessage(id, time, user_id, text, rant)
 }
 
-const ecRenderCacheMessage = (message: ECCacheData) => {
+const ecRenderCacheMessage = (message: ECCachedRant) => {
     const {id, time, user_id, text, username, rant, read} = message
     ecRenderMessage(id, time, user_id, text, rant, username, true, read)
 }
@@ -455,7 +520,7 @@ const ecHandleInitEvent = (eventData: REventInit) => {
 
     if (ecStorage.settings.cache && !ecCacheLoaded) {
         ecCacheLoaded = true
-        ecStorage.cache.forEach((message) => ecRenderCacheMessage(message))
+        ecStorage.cache.rants.forEach((message) => ecRenderCacheMessage(message))
     }
 
     messages.forEach((message) => {
@@ -536,6 +601,9 @@ let loadRants = () => {
     ecInsertStyle()
     ecInsertHtml()
     ecRegisterResize()
+
+    ecStorage.cache.title = document.title
+    ecSaveData()
 
     const eventSource = new EventSource(
             `https://web7.rumble.com/chat/api/chat/${ecVideoId}/stream`,
