@@ -48,7 +48,17 @@ To disable this, uncheck "Cache Rants".
 If the cache is enabled, upon loading the Rants for a stream previously viewed, the previous 
 Rants will be shown before showing any new Rants.
 
-Cached data older than 2 days will be deleted from the browser.
+Cached data older than 14 days will be deleted from the browser.
+
+**Export to CSV**
+
+This will download the displayed Rants to a CSV file.
+
+May need to allow pop-ups for Rumble.com in order for download to work.
+
+## Changes
+
+See [CHANGELOG](CHANGELOG.md)
 
 ## Development
 
