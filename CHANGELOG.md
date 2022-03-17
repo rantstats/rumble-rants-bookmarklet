@@ -1,5 +1,10 @@
 # Rumble Rants Bookmarklet Changes
 
+## 1.3.1
+
+- Fixed CSV export not working all the time
+- Add support for showing cached rants even if live stream over
+
 ## 1.3.0
 
 - Export to CSV button (see bottom of sidebar)

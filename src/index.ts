@@ -260,9 +260,8 @@ const downloadCSV = (event: Event) => {
         ])
     })
 
-    const csvData = "data:text/csv;charset=utf-8," + rows.map(row => row.join(",")).join("\n")
-    window.open(encodeURI(csvData))
-
+    const csvData = "data:text/csv;charset=utf-8," + encodeURIComponent(rows.map(row => row.join(",")).join("\n"))
+    window.open(csvData)
     event.preventDefault()
 }
 
