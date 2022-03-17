@@ -28,6 +28,11 @@
       gap: 10px;
       font-size: 12px;
       justify-content: space-between; }
+    .external-chats .ec-header .ec-error {
+      display: block;
+      font-weight: bold; }
+      .external-chats .ec-header .ec-error.hidden {
+        display: none; }
   .external-chats .external-chat-list {
     display: flex;
     flex-direction: column;

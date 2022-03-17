@@ -36,6 +36,15 @@
             font-size: 12px;
             justify-content: space-between;
         }
+
+        .ec-error {
+            display: block;
+            font-weight: bold;
+
+            &.hidden {
+                display: none;
+            }
+        }
     }
 
     .external-chat-list {

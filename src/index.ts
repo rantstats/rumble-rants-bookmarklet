@@ -7,6 +7,7 @@ let ecCacheLoaded = false
 let ecVideoId = ""
 let ecRantLevels: Array<RRantLevel> = []
 const ecUsers: Map<string, RUser> = new Map<string, RUser>()
+const ecDefaultRantLevels = [1, 2, 5, 10, 20, 50, 100, 200, 300, 400, 500,]
 
 // region Rumble Types
 
@@ -307,6 +308,9 @@ const ecInsertHtml = () => {
                         <input type="checkbox" id="ec-cache" ${ecStorage.settings.cache ? "checked" : ""}/>
                     </label>
                 </div>
+                <div class="ec-error hidden" id="ec-error">
+                    <p>Could not load chats, is the live stream over? Any cached Rants shown below.</p>
+                </div>
             </header>
             <div class="external-chat-list" id="external-chat-list" data-sort-order="0"></div>
             <footer>
@@ -405,15 +409,20 @@ const ecRenderMessage = (id, time, user_id, text, rant, username = undefined, ca
     }
 
 
-    let matchingRantLevel: RRantLevel = undefined
+    let matchingRantLevel: number = 0
     let rantHTML = ""
     if (rant) {
         const price_dollars = rant.price_cents / 100
 
-        ecRantLevels.forEach((rantLevel) => {
-            if (price_dollars >= rantLevel.price_dollars) {
-                if (matchingRantLevel) {
-                    if (matchingRantLevel.price_dollars < rantLevel.price_dollars) {
+        let rantLevels = ecDefaultRantLevels
+        if (ecRantLevels.length > 0){
+            rantLevels = ecRantLevels.map((rantLevel) => {return rantLevel.price_dollars})
+        }
+
+        rantLevels.forEach((rantLevel) => {
+            if (price_dollars >= rantLevel) {
+                if (matchingRantLevel > 0) {
+                    if (matchingRantLevel < rantLevel) {
                         matchingRantLevel = rantLevel
                     }
                 } else {
@@ -435,9 +444,7 @@ const ecRenderMessage = (id, time, user_id, text, rant, username = undefined, ca
     }
 
     let rantClass = ""
-    if (matchingRantLevel) {
-        rantClass = `rant-${matchingRantLevel.price_dollars}`
-    }
+    rantClass = `rant-${matchingRantLevel}`
 
     let userImageHTML = ""
     if (userImage) {
@@ -490,22 +497,62 @@ const ecHandleMessage = (message: RMessage) => {
     }
 }
 
-const ecGenerateRantStyles = () => {
+const ecGenerateRantStyles = (fallback = false) => {
+    if (document.getElementById("ec-rant-styles")) {
+        return
+    }
+
     let styleLines = []
-    ecRantLevels.forEach((rantLevel) => {
+
+    if (fallback || ecRantLevels.length == 0) {
         styleLines.push(...[
-            `.external-chat.rant-${rantLevel.price_dollars} {`,
-            `color: ${rantLevel.colors.fg};`,
-            `background: ${rantLevel.colors.main};`,
-            `}`,
-            `.external-chat.rant-${rantLevel.price_dollars} .rant-amount {`,
-            `background: ${rantLevel.colors.bg2};`,
-            `}`,
+            ".external-chat.rant-1 { color: white; background: #4a90e2; }",
+            ".external-chat.rant-1 .rant-amount { background: #4382cb; }",
+            ".external-chat.rant-2 { color: black; background: #b8e986; }",
+            ".external-chat.rant-2 .rant-amount { background: #a6d279; }",
+            ".external-chat.rant-5 { color: black; background: #f8e71c; }",
+            ".external-chat.rant-5 .rant-amount { background: #dfd019; }",
+            ".external-chat.rant-10 { color: black; background: #f5a623; }",
+            ".external-chat.rant-10 .rant-amount { background: #dd9520; }",
+            ".external-chat.rant-20 { color: white; background: #bd10e0; }",
+            ".external-chat.rant-20 .rant-amount { background: #aa0eca; }",
+            ".external-chat.rant-50 { color: white; background: #9013fe; }",
+            ".external-chat.rant-50 .rant-amount { background: #8211e5; }",
+            ".external-chat.rant-100 { color: white; background: #d0021b; }",
+            ".external-chat.rant-100 .rant-amount { background: #bb0218; }",
+            ".external-chat.rant-200 { color: white; background: #d0021b; }",
+            ".external-chat.rant-200 .rant-amount { background: #bb0218; }",
+            ".external-chat.rant-300 { color: white; background: #d0021b; }",
+            ".external-chat.rant-300 .rant-amount { background: #bb0218; }",
+            ".external-chat.rant-400 { color: white; background: #d0021b; }",
+            ".external-chat.rant-400 .rant-amount { background: #bb0218; }",
+            ".external-chat.rant-500 { color: white; background: #d0021b; }",
+            ".external-chat.rant-500 .rant-amount { background: #bb0218; }",
         ])
-    })
+    } else {
+        ecRantLevels.forEach((rantLevel) => {
+            styleLines.push(...[
+                `.external-chat.rant-${rantLevel.price_dollars} {`,
+                `color: ${rantLevel.colors.fg};`,
+                `background: ${rantLevel.colors.main};`,
+                `}`,
+                `.external-chat.rant-${rantLevel.price_dollars} .rant-amount {`,
+                `background: ${rantLevel.colors.bg2};`,
+                `}`,
+            ])
+        })
+    }
     const style = document.createElement("style") as HTMLStyleElement
+    style.id = "ec-rant-styles"
     style.appendChild(document.createTextNode(styleLines.join(" ")))
     document.head.appendChild(style)
+}
+
+const displayCachedRants = () => {
+    if (ecStorage.settings.cache && !ecCacheLoaded) {
+        ecCacheLoaded = true
+        ecStorage.cache.rants.forEach((message) => ecRenderCacheMessage(message))
+    }
 }
 
 const ecHandleInitEvent = (eventData: REventInit) => {
@@ -518,10 +565,7 @@ const ecHandleInitEvent = (eventData: REventInit) => {
         ecUsers.set(user.id, user)
     })
 
-    if (ecStorage.settings.cache && !ecCacheLoaded) {
-        ecCacheLoaded = true
-        ecStorage.cache.rants.forEach((message) => ecRenderCacheMessage(message))
-    }
+    displayCachedRants()
 
     messages.forEach((message) => {
         ecHandleMessage(message)
@@ -611,6 +655,22 @@ let loadRants = () => {
                 withCredentials: true,
             }
     )
-    eventSource.addEventListener("message", ecHandleReceiveMessage)
+    eventSource.onopen = (event) => {
+        console.log("opened", event)
+    }
+    eventSource.onerror = (event) => {
+        console.error("Could not load chat stream")
+        const errorMessage = document.getElementById("ec-error")
+        console.log("message, showing error")
+        errorMessage.classList.remove("hidden")
+        ecGenerateRantStyles(true)
+        displayCachedRants()
+    }
+    eventSource.onmessage = (event) => {
+        const errorMessage = document.getElementById("ec-error")
+        console.log("message, hiding error")
+        errorMessage.classList.add("hidden")
+        ecHandleReceiveMessage(event)
+    }
 }
 loadRants()
