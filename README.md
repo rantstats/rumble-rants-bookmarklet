@@ -71,3 +71,12 @@ See [CHANGELOG](CHANGELOG.md)
 To use local `index.js` file, change `src` in bookmarklet to path from local server.
 Start the node http server by running `yarn run serve`. 
 The new `src` will be something like `http://localhost:8000/index.js`. 
+
+## Support
+
+If you want to support me:
+
+- [PayPal](https://www.paypal.me/stevencrader)
+- [$craders](https://www.cash.app/$craders)
+- [Venmo](https://venmo.com/code?user_id=467277291978752568&created=1654152122)
+- [Twitter](https://twitter.com/stevencrader)
