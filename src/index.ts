@@ -276,6 +276,30 @@ const ecInsertStyle = () => {
     document.head.appendChild(style)
 }
 
+const updateThemeStyle = (ecThemePreference: string) => {
+    const chatDiv = document.getElementById("external-chats")
+    const newTheme = `ec-theme-${ecThemePreference}`
+    chatDiv.classList.remove("ec-theme-dark", "ec-theme-light")
+    chatDiv.classList.add(newTheme)
+}
+
+const updateTheme = () => {
+    let ecThemePreference = localStorage.getItem("themePreference") || "dark"
+    if (ecThemePreference == "system") {
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            ecThemePreference = "dark"
+        } else {
+            ecThemePreference = "light"
+        }
+    }
+    updateThemeStyle(ecThemePreference)
+}
+
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+    const newColorScheme = event.matches ? "dark" : "light"
+    updateThemeStyle(newColorScheme)
+})
+
 const ecInsertHtml = () => {
     let width = ecStorage.settings.width || 500
     if (width < 100) {
@@ -414,8 +438,10 @@ const ecRenderMessage = (id, time, user_id, text, rant, username = undefined, ca
         const price_dollars = rant.price_cents / 100
 
         let rantLevels = ecDefaultRantLevels
-        if (ecRantLevels.length > 0){
-            rantLevels = ecRantLevels.map((rantLevel) => {return rantLevel.price_dollars})
+        if (ecRantLevels.length > 0) {
+            rantLevels = ecRantLevels.map((rantLevel) => {
+                return rantLevel.price_dollars
+            })
         }
 
         rantLevels.forEach((rantLevel) => {
@@ -627,6 +653,13 @@ const ecRegisterResize = () => {
     }, false)
 }
 
+const ecRegisterStyleChangeHandler = () => {
+    const themeButtons = document.getElementsByClassName("js-theme-option")
+    Array.from(themeButtons).forEach((element) => {
+        element.addEventListener("click", updateTheme)
+    })
+}
+
 let loadRants = () => {
     const chatDiv = document.getElementById("external-chats")
     if (chatDiv) {
@@ -644,6 +677,7 @@ let loadRants = () => {
     ecInsertStyle()
     ecInsertHtml()
     ecRegisterResize()
+    ecRegisterStyleChangeHandler()
 
     ecStorage.cache.title = document.title
     ecSaveData()
@@ -655,6 +689,7 @@ let loadRants = () => {
             }
     )
     eventSource.onopen = (event) => {
+        updateTheme()
         console.log("opened", event)
     }
     eventSource.onerror = (event) => {
