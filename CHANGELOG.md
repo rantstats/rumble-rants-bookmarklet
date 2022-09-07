@@ -1,5 +1,11 @@
 # Rumble Rants Bookmarklet Changes
 
+## 1.3.2
+
+- Set default read value
+- Add support for dark mode
+- Fix log message hiding error being logged every message
+
 ## 1.3.1
 
 - Fixed CSV export not working all the time
