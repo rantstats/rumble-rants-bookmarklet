@@ -421,7 +421,8 @@ const ecRenderMessage = (id, time, user_id, text, rant, username = undefined, ca
             username: username,
             rant: {
                 price_cents: rant.price_cents,
-            }
+            },
+            read: false
         })
 
         // don't render during sort change
