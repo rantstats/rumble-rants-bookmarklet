@@ -15,7 +15,7 @@ javascript: (function () {
         var rantJS = document.createElement('script');
         rantJS.setAttribute('id', 'rant-js-script');
         rantJS.setAttribute('type', 'text/javascript');
-        rantJS.setAttribute('src', 'https://combinatronics.com/stevencrader/rumble-rants-bookmarklet/master/lib/index.js');
+        rantJS.setAttribute('src', 'https://raw.githack.com/stevencrader/rumble-rants-bookmarklet/master/lib/index.js');
         document.head.appendChild(rantJS);
     } else {
         loadRants();
