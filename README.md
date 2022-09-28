@@ -15,13 +15,16 @@ javascript: (function () {
         var rantJS = document.createElement('script');
         rantJS.setAttribute('id', 'rant-js-script');
         rantJS.setAttribute('type', 'text/javascript');
-        rantJS.setAttribute('src', 'https://raw.githack.com/stevencrader/rumble-rants-bookmarklet/master/lib/index.js');
+        rantJS.setAttribute('src', 'https://rantstats.com/bookmarklet/bookmarklet.js');
         document.head.appendChild(rantJS);
     } else {
         loadRants();
     }
 })();
 ```
+
+The code snippet above loads the files from rantstats.com. If you would rather use GitHub, change the `src` URl to
+`https://raw.githack.com/stevencrader/rumble-rants-bookmarklet/master/lib/index.js`.
 
 ![Browser page loaded with Rants sidebar shown.](https://raw.githubusercontent.com/stevencrader/rumble-rants-bookmarklet/master/docs/screenshot.png "Example Screenshot")
 
