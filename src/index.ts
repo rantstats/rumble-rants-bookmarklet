@@ -1,6 +1,7 @@
 // noinspection CssUnusedSymbol
 const EC_CACHE_PREFIX_KEY = "c-"
 const EC_SETTINGS_KEY = `${EC_CACHE_PREFIX_KEY}settings`
+const EC_NOTIFICATIONS_KEY = `${EC_CACHE_PREFIX_KEY}notifications`
 
 let ecSkipRender = false
 let ecCacheLoaded = false
@@ -118,6 +119,7 @@ type ECSettings = {
 type ECLocalStorage = {
     settings?: ECSettings
     cache: ECCacheData,
+    notifications: Array<string>;
 }
 
 const ecStorage: ECLocalStorage = {
@@ -130,10 +132,12 @@ const ecStorage: ECLocalStorage = {
         title: document.title,
         rants: new Map<string, ECCachedRant>(),
     },
+    notifications: [],
 }
 
 const ecSaveData = () => {
     localStorage.setItem(EC_SETTINGS_KEY, JSON.stringify(ecStorage.settings))
+    localStorage.setItem(EC_NOTIFICATIONS_KEY, JSON.stringify(ecStorage.notifications))
     if (ecStorage.settings.cache) {
         localStorage.setItem(
                 `${EC_CACHE_PREFIX_KEY}${ecVideoId}`,
@@ -168,6 +172,8 @@ const ecGetData = () => {
         }
         if (key === EC_SETTINGS_KEY) {
             ecStorage.settings = data as ECSettings
+        } else if (key === EC_NOTIFICATIONS_KEY) {
+            ecStorage.notifications = data as Array<string>
         } else {
             const value: string = key.substring(key.indexOf('-') + 1)
             const valueInt = parseInt(value)
@@ -239,6 +245,22 @@ const ecCacheChanged = (event: Event) => {
     ecSaveData()
 }
 
+const ecGetNotifications = (): Array<string> => {
+    if (!ecStorage.notifications) {
+        // init notifications if none
+        ecStorage.notifications = []
+        ecSaveData()
+    }
+    return ecStorage.notifications
+}
+
+const ecHideNotification = (name: string) => {
+    if (ecStorage.notifications.indexOf(name) < 0) {
+        ecStorage.notifications.push(name)
+        ecSaveData()
+    }
+}
+
 const downloadCSV = (event: Event) => {
     const rows = [
         ["stream title", JSON.stringify(ecStorage.cache.title)],
@@ -263,6 +285,14 @@ const downloadCSV = (event: Event) => {
     const csvData = "data:text/csv;charset=utf-8," + encodeURIComponent(rows.map(row => row.join(",")).join("\n"))
     window.open(csvData)
     event.preventDefault()
+}
+
+const hideNotification = (event: Event) => {
+    const closeNotification = event.target as HTMLSpanElement
+    const rootNotificationParagraph = closeNotification.parentElement as HTMLParagraphElement
+    ecHideNotification(rootNotificationParagraph.id)
+    rootNotificationParagraph.classList.add('hidden')
+    ecSaveData()
 }
 
 const ecInsertStyle = () => {
@@ -307,6 +337,10 @@ const ecInsertHtml = () => {
         ecStorage.settings.width = width
         ecSaveData()
     }
+
+    const hiddenNotifications = ecGetNotifications()
+    const extensionHiddenClass = hiddenNotifications.indexOf('ec-notification-extension') < 0 ? "" : "hidden"
+
     // language=html
     const html = `
         <div class="external-chats" id="external-chats" style="width: ${width}px;">
@@ -334,12 +368,18 @@ const ecInsertHtml = () => {
                 <div class="ec-error hidden" id="ec-error">
                     <p>Could not load chats, is the live stream over? Any cached Rants shown below.</p>
                 </div>
+                <div class="ec-notification">
+                    <p class="${extensionHiddenClass}" id="ec-notification-extension">
+                        Check out the <a href="https://rantstats.com/" target="_blank">Rant Stats Extension</a>!
+                        More functionality and better user experience.
+                        Pop out Rants! <span class="close-notification" title="Hide Notification">Close</span>
+                    </p>
+                </div>
             </header>
             <div class="external-chat-list" id="external-chat-list" data-sort-order="0"></div>
             <footer>
                 <p><a href="https://twitter.com/stevencrader" target="_blank">By Steven Crader</a></p>
-                <p><a href="https://github.com/stevencrader/rumble-rants-bookmarklet" target="_blank">On GitHub</a></p>
-
+                <p><a href="https://rantstats.com/" target="_blank">Rant Stats</a></p>
                 <p><a href="#" id="download-csv">Export to CSV</a></p>
             </footer>
         </div>
@@ -354,6 +394,10 @@ const ecInsertHtml = () => {
     select.addEventListener('change', ecSortOrderChanged)
     const checkbox = document.getElementById(`ec-cache`)
     checkbox.addEventListener('change', ecCacheChanged)
+    const closeNotifications = document.getElementsByClassName('close-notification') as HTMLCollectionOf<HTMLSpanElement>
+    Array.from(closeNotifications).forEach((closeNotification) => {
+        closeNotification.addEventListener('click', hideNotification)
+    })
 }
 
 const ecGetVideoID = (): string => {
@@ -396,7 +440,7 @@ const ecCacheMessage = (cacheData: ECCachedRant) => {
 }
 
 const ecRenderMessage = (id, time, user_id, text, rant, username = undefined, cached = false,
-        read = false) => {
+                         read = false) => {
     if (username === undefined) {
         username = user_id
     }

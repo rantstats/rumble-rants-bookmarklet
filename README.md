@@ -1,5 +1,12 @@
 # Rumble Rants Overlay
 
+> ❗ ❗ ❗ 
+> 
+> This bookmarklet is in maintenance only mode. 
+> Please use the [Rant Stats Extension](https://rantstats.com/) for a better user experience and more features!
+> 
+> ❗ ❗ ❗
+
 **WARNING:** this relies on undocumented features of Rumble. If Rumble changes their site, this may break.
 
 Builds a browser bookmarklet that will create on overlay on the [Rumble.com](https://rumble.com/) live stream page 

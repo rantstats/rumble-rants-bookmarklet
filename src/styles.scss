@@ -49,6 +49,28 @@
                 display: none;
             }
         }
+
+        .ec-notification {
+            font-weight: bold;
+
+            a {
+                text-decoration: underline;
+            }
+
+            #ec-notification-extension {
+                &.hidden {
+                    display: none;
+                }
+            }
+
+            .close-notification {
+                cursor: pointer;
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+        }
     }
 
     .external-chat-list {
