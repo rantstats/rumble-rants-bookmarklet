@@ -31,9 +31,9 @@ javascript: (function () {
 ```
 
 The code snippet above loads the files from rantstats.com. If you would rather use GitHub, change the `src` URl to
-`https://raw.githack.com/stevencrader/rumble-rants-bookmarklet/master/lib/index.js`.
+`https://raw.githack.com/rantstats/rumble-rants-bookmarklet/master/lib/index.js`.
 
-![Browser page loaded with Rants sidebar shown.](https://raw.githubusercontent.com/stevencrader/rumble-rants-bookmarklet/master/docs/screenshot.png "Example Screenshot")
+![Browser page loaded with Rants sidebar shown.](https://raw.githubusercontent.com/rantstats/rumble-rants-bookmarklet/master/docs/screenshot.png "Example Screenshot")
 
 ## How to Use
 
